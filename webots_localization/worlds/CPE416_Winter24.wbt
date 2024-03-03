@@ -1,0 +1,139 @@
+#VRML_SIM R2023b utf8
+
+IMPORTABLE EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/gctronic/e-puck/protos/E-puck.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/gctronic/e-puck/protos/E-puckGroundSensors.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/RectangleArena.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+
+WorldInfo {
+  info [
+    "This behavior-based controller allows the e-puck robot to follow the black line, avoid obstacles and recover its path afterwards."
+    "This model of the e-puck is equipped with ground sensors, located at the front of the e-puck."
+    "Thanks to Jean-Christophe Zufferey (EPFL-LIS)."
+  ]
+  title "CPE416 Localization Lab"
+  coordinateSystem "NUE"
+  lineScale 0.04
+}
+Viewpoint {
+  orientation 0.3967050495644827 -0.6234296118735724 -0.6737659999504341 2.055815814870474
+  position 0.2308971465742803 0.8895954414262174 -0.2791040790374489
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  translation -2.22044e-18 -0.02 -4.4409e-18
+  rotation -0.5773502691896258 0.5773502691896258 0.5773502691896258 2.0943951023931953
+  floorSize 0.7 0.7
+  floorTileSize 0.7 0.7
+  floorAppearance PBRAppearance {
+    baseColorMap ImageTexture {
+      url [
+        "textures/CPE416_webots_localization_floor.png"
+      ]
+    }
+    roughness 0.2
+    metalness 0
+  }
+  wallHeight 0.05
+}
+DEF OBSTACLE2 Solid {
+  translation -0.0032696778538735365 0.029921520000011744 0.24605395180122747
+  rotation 7.866980968110222e-15 -1 -1.7689428668035892e-16 0.058487890032056254
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.501961 1
+        roughness 0.5
+        metalness 0
+      }
+      geometry DEF BOX2 Box {
+        size 0.1 0.1 0.02
+      }
+    }
+  ]
+  name "pink box"
+  boundingObject USE BOX2
+  physics Physics {
+    density -1
+    mass 0.2
+  }
+  linearVelocity 3.791735205503694e-17 -9.254819133274842e-14 9.741919572135683e-17
+  angularVelocity 2.122304994446645e-15 2.2127147722937123e-16 -6.076842944552709e-16
+}
+DEF OBSTACLE2 Solid {
+  translation -0.0024840000000000127 0.02992152000001192 -0.251048
+  rotation 0.9695202130907193 -0.24087822129568684 0.04481337873841454 4.756678178012527e-16
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.501961 1
+        roughness 0.5
+        metalness 0
+      }
+      geometry DEF BOX2 Box {
+        size 0.1 0.1 0.02
+      }
+    }
+  ]
+  name "pink box(1)"
+  boundingObject USE BOX2
+  physics Physics {
+    density -1
+    mass 0.2
+  }
+  linearVelocity 1.473085629794121e-17 -9.24771370591756e-14 -9.48822234460955e-17
+  angularVelocity -2.241796492031564e-15 -7.357523822521048e-17 4.437342591868191e-31
+}
+DEF OBSTACLE2 Solid {
+  translation 0.253861 0.029921520000011848 -0.0013490000000000023
+  rotation 3.0612293926004955e-16 1 1.0193130023859373e-16 1.5708000000000002
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.501961 1
+        roughness 0.5
+        metalness 0
+      }
+      geometry DEF BOX2 Box {
+        size 0.1 0.1 0.02
+      }
+    }
+  ]
+  name "pink box(2)"
+  boundingObject USE BOX2
+  physics Physics {
+    density -1
+    mass 0.2
+  }
+  linearVelocity 4.481588220363039e-17 -9.251266419596951e-14 -6.715914281419743e-17
+  angularVelocity -6.661355087537871e-16 3.911101101431608e-17 -9.607721837773583e-16
+}
+DEF EPUCK E-puck {
+  hidden position_0_0 127.52819908153208
+  hidden position_0_1 180.0357972086063
+  hidden linearVelocity_0 -0.003783436305703971 -2.2946972203881748e-08 0.0018380928126926956
+  hidden angularVelocity_0 0.0060056128863489825 0.041101440868939 0.012378193608321809
+  hidden translation_1 0 0.026000000000000655 0.02
+  hidden rotation_1 0 -1 0 3.6855072984921615
+  hidden linearVelocity_1 -0.002884185846980179 -1.74387603557582e-07 0.0013995764689408439
+  hidden angularVelocity_1 0.06785588726986166 0.04110065244855506 0.13976901150302817
+  hidden translation_2 0 -0.025999999999999853 0.02
+  hidden rotation_2 0 -1 0 1.4433916323601979
+  hidden linearVelocity_2 -0.004806397642643086 -1.775926255831489e-07 0.002337155046227534
+  hidden angularVelocity_2 0.11898050543474849 0.04111339805292376 0.2447597903066969
+  translation -0.07029897155136991 -0.020063922355214814 -0.14556212511632863
+  rotation -0.16034881126254164 -0.6978236910082173 -0.6980905063058501 2.8213455878416966
+  name "e-puck(1)"
+  controller "my_controller"
+  controllerArgs [
+    ""
+  ]
+  groundSensorsSlot [
+    E-puckGroundSensors {
+    }
+  ]
+}
