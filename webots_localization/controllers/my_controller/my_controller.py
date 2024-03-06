@@ -160,6 +160,7 @@ particles = [15.850517836761862, 76.06815421368766, 349.59537364800116, 223.8879
 n = 0
 encoder_values = None
 # print("MCL: " + str(encoder_values))
+dist = []
 
 # run it every 5 times/32 ms and while location is not determined
 while robot.step(timestep) != -1 and location is False: # every 32 ms
@@ -184,6 +185,9 @@ while robot.step(timestep) != -1 and location is False: # every 32 ms
         # get distance sensor reading
         distance = right_distance_sensor.getValue()
         print("distance: " + str(distance))
+
+
+
         # checks each particle if it is in free space or block and appends probability
         particle_weights = []
         for particle in particles:
@@ -201,10 +205,6 @@ while robot.step(timestep) != -1 and location is False: # every 32 ms
         sum_weight = sum(particle_weights)
         normalized_weights = [weight / sum_weight for weight in particle_weights]
 
-        # print(particles)
-        # print(len(particles))
-        # for i in range(len(particles)):
-        #     print(str(n) + " " + str(i) + ": " + str(particles[i]) + " " + str(normalized_weights[i])) 
         # choose 95 particles based on the weights
         new_particles = random.choices(particles, weights=normalized_weights, k=95)
         #print(normalized_weights)
@@ -224,7 +224,7 @@ while robot.step(timestep) != -1 and location is False: # every 32 ms
 
 
 
-        # # getting avg diff in encoders
+        # getting avg diff in encoders
         curr_encoder_values = [encoder.getValue() for encoder in encoders]
         if encoder_values is None:
             diff = 0
