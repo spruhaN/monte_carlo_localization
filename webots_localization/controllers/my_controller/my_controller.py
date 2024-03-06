@@ -6,6 +6,28 @@ import random
 import math
 import time
 
+def print_histogram(values):
+    # Create a dictionary to count the frequency of each value
+    values = [int(num) for num in values]
+
+    bucket_size = 20
+    min_value, max_value = 0, 360
+    
+    # Initialize the buckets
+    buckets = [0] * ((max_value - min_value) // bucket_size)
+    
+    # Assign each value to a bucket
+    for value in values:
+        if min_value <= value < max_value:
+            bucket_index = (value - min_value) // bucket_size
+            buckets[bucket_index] += 1
+    
+    # Print the histogram
+    for i, count in enumerate(buckets):
+        bucket_min = i * bucket_size
+        bucket_max = bucket_min + bucket_size
+        print(f"[{bucket_min}-{bucket_max}): {'*' * count}")
+    # print("=========")
 
 
 def compute_proportional(sensor_left,sensor_right):
@@ -88,7 +110,10 @@ def calculate_particles(new_particles):
     sin_val /= len(new_particles)
     cos_val /= len(new_particles)
 
-    stddev = math.sqrt(-math.log(sin_val ** 2+cos_val ** 2))
+    inner = -math.log((sin_val ** 2)+(cos_val ** 2))
+    if inner < 0:
+        return False
+    stddev = math.sqrt(inner)
 
     mean = math.degrees(math.atan2(sin_val, cos_val))
 
@@ -164,7 +189,6 @@ dist = []
 
 # run it every 5 times/32 ms and while location is not determined
 while robot.step(timestep) != -1 and location is False: # every 32 ms
-    
     # ========================= PID CONTROLLER ===============================
 
     # get ir sensors 
@@ -180,11 +204,12 @@ while robot.step(timestep) != -1 and location is False: # every 32 ms
 
     # ========================================================================
     
-    if n == 9:
+    if n == 19:
+        print_histogram(particles)
     # ================================= MCL ==================================
         # get distance sensor reading
         distance = right_distance_sensor.getValue()
-        print("distance: " + str(distance))
+        # print("distance: " + str(distance))
 
 
 
@@ -196,22 +221,25 @@ while robot.step(timestep) != -1 and location is False: # every 32 ms
 
             # appends probability of distance based on category
             if space == True: # block => p(particle|block)
-                weight = trap_prob(96, 137, 225, 250, distance)
+                weight = trap_prob(85,127,148,200 , distance) # 96, 137, 225, 250,
                 particle_weights.append(weight)
+                #print(str(particle) + " is a block w/ a weight of " + str(weight))
             else: # free space => p(particle|free_space)
-                weight = trap_prob(25, 56, 71, 130, distance)
+                weight = trap_prob(40,54,78,100, distance) # 25, 56, 71, 130,
                 particle_weights.append(weight)
+                #print(str(particle) + " is a free_space w/ a weight of " + str(weight))
 
         sum_weight = sum(particle_weights)
         normalized_weights = [weight / sum_weight for weight in particle_weights]
 
         # choose 95 particles based on the weights
         new_particles = random.choices(particles, weights=normalized_weights, k=95)
+
         #print(normalized_weights)
         stdev,mean = calculate_particles(new_particles)
-        print("stdev: " + str(stdev))
-        print("========================")
-        if stdev < .3: # CHANGE THRESHOLD
+        if stdev is False:
+            stdev = float("inf")
+        if stdev < .1: # CHANGE THRESHOLD
             location =  mean # mean
             print("ANGLE IS " + str(mean))
             right_motor.setVelocity(0)
@@ -227,12 +255,12 @@ while robot.step(timestep) != -1 and location is False: # every 32 ms
         # getting avg diff in encoders
         curr_encoder_values = [encoder.getValue() for encoder in encoders]
         if encoder_values is None:
-            diff = 0
+            diff = .32 # ?
         else:
             diff = ((curr_encoder_values[0] - encoder_values[0]) + (curr_encoder_values[1] - encoder_values[1])) / 2
         encoder_values = curr_encoder_values
-
-        print("diff: " + str(diff))
+        diff = (diff/CIRCLE_ENCODER) * 360
+        # print("diff: " + str(diff))
         #print("MCL:" + str([encoder.getValue() for encoder in encoders]))
 
         # advancing particles
@@ -243,15 +271,19 @@ while robot.step(timestep) != -1 and location is False: # every 32 ms
             z = math.sqrt(-2 * math.log(u_1)) * math.cos(2 * math.pi * u_2)
 
             # advancing particles w/ noise and encoder offset
-            particles[i]= (particle + z + diff) % 360 # adds motion noise and avg distance between five iter
-        #print("NEW: " + str(particles))
-    
-        # print("PID:" + str([encoder.getValue() for encoder in encoders]))
+            particles[i]= (particle + z + diff) % 360 # adds motion noise and avg distance between ten iter
+        print(sum(particle_weights))
+        print("==========" + "stdev: " + str(stdev) + "==============")
     # ========================================================================
-    n += 1
-    n = n % 10 # resets counter if 5 => 0 
 
-print("DONE")
+    n += 1
+    n = n % 20 # resets counter if 5 => 0 
+
+print("DONE" + str(location))
+
+
+
+
 # ========================== GO TO TOWER AND HIT  =================================
 
 # if fin degree in range of target tower then there!
