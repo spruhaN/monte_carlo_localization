@@ -9,7 +9,8 @@ import time
 def print_histogram(values):
     # Create a dictionary to count the frequency of each value
     values = [int(num) for num in values]
-
+    c = Counter(values)
+    max_val = c.most_common(1)[0][0]
     bucket_size = 20
     min_value, max_value = 0, 360
     
@@ -27,6 +28,8 @@ def print_histogram(values):
         bucket_min = i * bucket_size
         bucket_max = bucket_min + bucket_size
         print(f"[{bucket_min}-{bucket_max}): {'*' * count}")
+
+    return max_val
     # print("=========")
 
 
@@ -107,22 +110,29 @@ def calculate_particles(new_particles):
         sin_val += math.sin(math.radians(angle))
         cos_val += math.cos(math.radians(angle))
 
-    sin_val /= len(new_particles)
-    cos_val /= len(new_particles)
+    if len(new_particles) > 0:
+        sin_val /= len(new_particles)
+        cos_val /= len(new_particles)
 
-    inner = -math.log((sin_val ** 2)+(cos_val ** 2))
-    if inner < 0:
-        return False
-    stddev = math.sqrt(inner)
+    resultant_length = math.sqrt(sin_val**2 + cos_val**2)
+    resultant_length = round(resultant_length,11)
+    # Define a small threshold to handle floating-point precision issues
+    epsilon = 1e-10
 
-    mean = math.degrees(math.atan2(sin_val, cos_val))
+    stddev = float("inf")  # Default to max dispersion
+    # Check if resultant_length is effectively greater than zero
+    if resultant_length > epsilon:
+        try:
+            inner = -2 * math.log(resultant_length)
+            stddev = math.sqrt(inner)
+        except ValueError:
+            print("resultant is " + str(resultant_length))
+            raise
 
-    if(cos_val > 0 and sin_val < 0): 
-        mean += 360
-    elif(cos_val < 0):
-        mean += 180
+    mean_angle = math.degrees(math.atan2(sin_val, cos_val))
+    mean_angle = mean_angle % 360
 
-    return stddev, mean
+    return stddev, mean_angle
 
 
 # create the Robot instance.
@@ -167,9 +177,9 @@ for i in range(2):
 # free space range 55 - 56.04 - 78.57 - 80 a < d 
 # block 90 - 102.87 - 119.13 - 121
     
-OFFSET = 11.35
+OFFSET = 12 #11.35
 THRESHOLD = 1
-CIRCLE_ENCODER = 59.434 # the right encoder 
+CIRCLE_ENCODER = 50.4 # the right encoder 
 
 towers = [0,90,270]
 # 348.65 - 11.35
@@ -180,13 +190,14 @@ target_tower = 1 # 90
 location = False
 
 # generate 100 particles
-particles = [15.850517836761862, 76.06815421368766, 349.59537364800116, 223.8879781071353, 243.42276923364741, 135.74427834889022, 228.39573302717963, 117.95318149357077, 271.4616631454017, 168.2655838551114, 282.38998783269716, 85.24711727240697, 211.84837482467026, 40.539628744582146, 205.37538950006544, 289.3350470906324, 284.2847730768327, 316.5412008616593, 83.23410244790487, 135.40932928280395, 30.831843663375338, 298.38479720552647, 95.06322443936845, 173.8444530833104, 274.1161132766744, 306.5800018970962, 3.8710713359182547, 262.9704533462341, 145.85227407162617, 332.4540615481167, 133.8371811842114, 297.7348752846196, 265.95170835624674, 69.10854835283885, 233.64722784628057, 68.39871422817438, 178.70920988834067, 238.6308081192492, 267.3722375570258, 164.53552725192614, 359.1796442800648, 118.03322464733968, 218.15361070924308, 10.292525350622498, 325.7957175007257, 123.01791769822243, 168.16148180732958, 329.95477412436827, 340.36053673415546, 232.53912315347216, 221.6477035207698, 300.95384374352386, 51.90083364887412, 212.6777851528236, 246.18686706134505, 286.2983522632843, 326.86230772836285, 233.66562195322692, 209.9451339729647, 352.77151318249776, 242.01256299909218, 158.34512597224116, 16.053982491782385, 53.3415812070855, 46.07766363010513, 336.3010164362628, 119.4710344042281, 122.66119360778812, 154.8355612147286, 300.502179912511, 53.941465397962396, 211.37269347888835, 194.37937994749288, 83.88856590446359, 267.30658196888544, 318.61554355596553, 306.5359008177688, 95.9023704527893, 354.81925878642113, 294.1905091286191, 251.83702327479256, 347.7207384772042, 10.055268187057566, 208.5499436579072, 99.5259732067016, 356.66883810854404, 171.29902134400626, 2.8553389338773534, 71.62924663537187, 192.95500949200735, 106.6690987545704, 303.97752990455047, 64.06122213050621, 21.92139300626656, 280.23081682187546, 188.7695960147641, 192.55598573526802, 342.2746265191758, 61.731181899017876, 325.66944392179636]
+particles = random.sample(range(360), 100)
+# [15.850517836761862, 76.06815421368766, 349.59537364800116, 223.8879781071353, 243.42276923364741, 135.74427834889022, 228.39573302717963, 117.95318149357077, 271.4616631454017, 168.2655838551114, 282.38998783269716, 85.24711727240697, 211.84837482467026, 40.539628744582146, 205.37538950006544, 289.3350470906324, 284.2847730768327, 316.5412008616593, 83.23410244790487, 135.40932928280395, 30.831843663375338, 298.38479720552647, 95.06322443936845, 173.8444530833104, 274.1161132766744, 306.5800018970962, 3.8710713359182547, 262.9704533462341, 145.85227407162617, 332.4540615481167, 133.8371811842114, 297.7348752846196, 265.95170835624674, 69.10854835283885, 233.64722784628057, 68.39871422817438, 178.70920988834067, 238.6308081192492, 267.3722375570258, 164.53552725192614, 359.1796442800648, 118.03322464733968, 218.15361070924308, 10.292525350622498, 325.7957175007257, 123.01791769822243, 168.16148180732958, 329.95477412436827, 340.36053673415546, 232.53912315347216, 221.6477035207698, 300.95384374352386, 51.90083364887412, 212.6777851528236, 246.18686706134505, 286.2983522632843, 326.86230772836285, 233.66562195322692, 209.9451339729647, 352.77151318249776, 242.01256299909218, 158.34512597224116, 16.053982491782385, 53.3415812070855, 46.07766363010513, 336.3010164362628, 119.4710344042281, 122.66119360778812, 154.8355612147286, 300.502179912511, 53.941465397962396, 211.37269347888835, 194.37937994749288, 83.88856590446359, 267.30658196888544, 318.61554355596553, 306.5359008177688, 95.9023704527893, 354.81925878642113, 294.1905091286191, 251.83702327479256, 347.7207384772042, 10.055268187057566, 208.5499436579072, 99.5259732067016, 356.66883810854404, 171.29902134400626, 2.8553389338773534, 71.62924663537187, 192.95500949200735, 106.6690987545704, 303.97752990455047, 64.06122213050621, 21.92139300626656, 280.23081682187546, 188.7695960147641, 192.55598573526802, 342.2746265191758, 61.731181899017876, 325.66944392179636]
 # random.sample(range(360), 100)
 n = 0
 encoder_values = None
 # print("MCL: " + str(encoder_values))
 dist = []
-
+max_val = 0
 # run it every 5 times/32 ms and while location is not determined
 while robot.step(timestep) != -1 and location is False: # every 32 ms
     # ========================= PID CONTROLLER ===============================
@@ -205,7 +216,6 @@ while robot.step(timestep) != -1 and location is False: # every 32 ms
     # ========================================================================
     
     if n == 19:
-        print_histogram(particles)
     # ================================= MCL ==================================
         # get distance sensor reading
         distance = right_distance_sensor.getValue()
@@ -230,26 +240,34 @@ while robot.step(timestep) != -1 and location is False: # every 32 ms
                 #print(str(particle) + " is a free_space w/ a weight of " + str(weight))
 
         sum_weight = sum(particle_weights)
-        normalized_weights = [weight / sum_weight for weight in particle_weights]
+        if sum_weight != 0:
+            try:
+                normalized_weights = [weight / sum_weight for weight in particle_weights]
+            except ZeroDivisionError:
+                print("ERR: ")
+                print(sum_weight)
+                print(particle_weights)
+                print(particles)
+                raise
+            # choose 95 particles based on the weights
+            new_particles = random.choices(particles, weights=normalized_weights, k=95)
 
-        # choose 95 particles based on the weights
-        new_particles = random.choices(particles, weights=normalized_weights, k=95)
+            #print(normalized_weights)
+            stdev,mean = calculate_particles(new_particles)
+            if stdev < .3: # CHANGE THRESHOLD
+                location =  mean # mean
+                print("ANGLE IS " + str(mean))
+                right_motor.setVelocity(0)
+                left_motor.setVelocity(0)
+                encoder_values = [encoder.getValue() for encoder in encoders]
 
-        #print(normalized_weights)
-        stdev,mean = calculate_particles(new_particles)
-        if stdev is False:
-            stdev = float("inf")
-        if stdev < .1: # CHANGE THRESHOLD
-            location =  mean # mean
-            print("ANGLE IS " + str(mean))
-            right_motor.setVelocity(0)
-            left_motor.setVelocity(0)
-            encoder_values = [encoder.getValue() for encoder in encoders]
-
-        # adds 5 random particles for a total of a 100 new particles 
-        for i in range(5):
-            new_particles.append(random.uniform(0, 360))
-
+            # adds 5 random particles for a total of a 100 new particles 
+            for i in range(5):
+                new_particles.append(random.uniform(0, 360))
+            advance = ""
+        else:
+            new_particles = particles
+            advance = "skip"
 
 
         # getting avg diff in encoders
@@ -272,46 +290,47 @@ while robot.step(timestep) != -1 and location is False: # every 32 ms
 
             # advancing particles w/ noise and encoder offset
             particles[i]= (particle + z + diff) % 360 # adds motion noise and avg distance between ten iter
-        print(sum(particle_weights))
-        print("==========" + "stdev: " + str(stdev) + "==============")
+        print("stdev: " + str(stdev))
+        max_val = print_histogram(particles)
+        print("=====" + advance + "stdev: " + str(stdev) + " mean_loc: " + str(mean) + " max_loc: " +str(max_val) +  "========")
     # ========================================================================
 
     n += 1
     n = n % 20 # resets counter if 5 => 0 
 
-print("DONE" + str(location))
+print("DONE" + str(location) + " " + str(max_val))
 
 
 
 
-# ========================== GO TO TOWER AND HIT  =================================
+# # ========================== GO TO TOWER AND HIT  =================================
 
-# if fin degree in range of target tower then there!
-curr_degree = encoder_values[1]/59.434 * 360
-while robot.step(timestep) != -1  and in_range(curr_degree, towers[target_tower]) is False:
-    # ========================= PID CONTROLLER ===============================
+# # if fin degree in range of target tower then there!
+# curr_degree = encoder_values[1]/59.434 * 360
+# while robot.step(timestep) != -1  and in_range(curr_degree, towers[target_tower]) is False:
+#     # ========================= PID CONTROLLER ===============================
 
-    # get ir sensors 
-    left_sensor = left_ground_sensor.getValue()
-    right_sensor = right_ground_sensor.getValue()
-    # pid
-    left_speed,right_speed = compute_proportional(left_sensor,right_sensor);
-    # scale motor and call
-    left_speed = left_speed/100
-    right_speed = right_speed/100
-    left_motor.setVelocity(left_speed) # set the left motor (radians/second)
-    right_motor.setVelocity(right_speed) # set the right motor (radians/second) 
+#     # get ir sensors 
+#     left_sensor = left_ground_sensor.getValue()
+#     right_sensor = right_ground_sensor.getValue()
+#     # pid
+#     left_speed,right_speed = compute_proportional(left_sensor,right_sensor);
+#     # scale motor and call
+#     left_speed = left_speed/100
+#     right_speed = right_speed/100
+#     left_motor.setVelocity(left_speed) # set the left motor (radians/second)
+#     right_motor.setVelocity(right_speed) # set the right motor (radians/second) 
 
-    # ========================================================================
+#     # ========================================================================
 
-    # ========================= ENCODER DIFF ===============================
+#     # ========================= ENCODER DIFF ===============================
     
-    encoder_values = [encoder.getValue() for encoder in encoders]
-    curr_degree = encoder_values[1]/59.434 * 360
+#     encoder_values = [encoder.getValue() for encoder in encoders]
+#     curr_degree = encoder_values[1]/59.434 * 360
 
-    # ========================================================================
+#     # ========================================================================
 
-turn_right()
+# turn_right()
 
 
 
