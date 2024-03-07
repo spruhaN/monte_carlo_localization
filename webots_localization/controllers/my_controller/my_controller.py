@@ -236,6 +236,8 @@ while robot.step(timestep) != -1 and location is False: # every 32 ms
 
         sum_weight = sum(particle_weights)
         # if sum is 0 or there are more than 95 non 0 val in weights
+        non_zero = sum(abs(value) > 1e-9 for value in particle_weights)
+        zero =  sum(abs(value) <= 1e-9 for value in particle_weights)
         # 
         if sum_weight != 0 or sum(abs(value) > 1e-9 for value in particle_weights) >= 3 :
             try:
@@ -277,8 +279,10 @@ while robot.step(timestep) != -1 and location is False: # every 32 ms
         diff = (diff/CIRCLE_ENCODER) * 360
 
         print("stdev: " + str(stdev))
-        max_val = print_histogram(particles)
+        max_val = print_histogram(new_particles)
         print("=====" + advance + "stdev: " + str(stdev) + " mean_loc: " + str(mean) + " max_loc: " +str(max_val) +  "========")
+        #print("=====" + advance + "stdev: " + str(stdev) + " non_zero: " + str(non_zero) + " zero: " +str(zero) +  "========")
+
         # advancing particles
         for i,particle in enumerate(new_particles): 
             # motion noise
@@ -295,7 +299,7 @@ while robot.step(timestep) != -1 and location is False: # every 32 ms
     n = n % 25 # resets counter if 5 => 0 
 
 print("DONE" + str(location) + " " + str(max_val))
-print(particles)
+# print(particles)
 
 
 
